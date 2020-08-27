@@ -90,7 +90,7 @@ source $ZSH/oh-my-zsh.sh
 # ssh
 # export SSH_KEY_PATH="~/.ssh/rsa_id"
 
-export PATH=~/bin:$PATH
+export PATH=$HOME/bin:$PATH
 
 # Set personal aliases, overriding those provided by oh-my-zsh libs,
 # plugins, and themes. Aliases can be placed here, though oh-my-zsh
@@ -123,7 +123,7 @@ alias ds='docker stats'
 alias dsf='docker stats --format "table {{.Name}}\t{{.CPUPerc}}\t{{.MemPerc}}\t{{.MemUsage}}\t{{.PIDs}}"'
 alias dsa='docker stop $(docker ps -q) && docker rm $(docker ps -aq)'
 
-alias npm='docker run --rm -ti --name npm -v "$PWD/":/app -v node_modules:/app/node_modules -w /app node npm'
+alias dnode='docker run --rm -ti --name node -v "$PWD/":/app -v node_modules:/app/node_modules -w /app node'
 
 # git find tag - locates the "closest" tag to a given commit
 function gft {

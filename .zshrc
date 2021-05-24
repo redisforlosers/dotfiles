@@ -12,7 +12,8 @@ export PATH=$HOME/.config/composer/vendor/bin:$PATH
 # to know which specific one was loaded, run: echo $RANDOM_THEME
 # See https://github.com/robbyrussell/oh-my-zsh/wiki/Themes
 #ZSH_THEME="bureau"
-ZSH_THEME="af-magic"
+#ZSH_THEME="af-magic"
+ZSH_THEME="sorin"
 
 # Set list of themes to pick from when loading at random
 # Setting this variable when ZSH_THEME=random will cause zsh to load
@@ -101,26 +102,30 @@ export PATH=$HOME/bin:$PATH
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 
-alias ez='nano ~/.zshrc'
+alias ez='vim ~/.zshrc'
 alias sz='source ~/.zshrc'
 
 alias htop='htop -d 7.5'
 
 alias ll='ls -lahF'
 
-function wp-cli
+alias find-big='find -type f -exec du -Sh {} + | sort -rh | head -n 5'
+
+function dwp-cli
 {
     docker run --rm --name wp-cli-"$1" -ti --volumes-from "$1" --network container:"$1" wordpress:cli "${@:2}"
 }
 
 alias dc='docker-compose'
-alias dcu='dc up -d'
+alias dcu='dc up'
+alias dcud='dcu -d'
 alias dcd='dc down'
 alias dcdv='dcd -v'
-alias dcr='dcdv && dcu'
+alias dcr='dcd && dcud'
+alias dcrv='dcdv && dcu'
 alias dcl='dc logs -f'
-alias ds='docker stats'
-alias dsf='docker stats --format "table {{.Name}}\t{{.CPUPerc}}\t{{.MemPerc}}\t{{.MemUsage}}\t{{.PIDs}}"'
+alias dcr='dc run --rm'
+alias ds='docker stats --format "table {{.Name}}\t{{.CPUPerc}}\t{{.MemPerc}}\t{{.MemUsage}}\t{{.PIDs}}"'
 alias dsa='docker stop $(docker ps -q) && docker rm $(docker ps -aq)'
 
 alias dnode='docker run --rm -ti --name node -v "$PWD/":/app -v node_modules:/app/node_modules -w /app node'
@@ -133,15 +138,43 @@ function gft {
 # git status only show staged files
 alias gsts='git status --short | grep '"'"'^[MARCD]'"'"''
 
-# git export master to a directory
+# git undo last commit
+alias gu='git reset --soft HEAD~1'
+
+# git merge main
+alias gmm='git merge main'
+
+# git checkout main
+alias gcm='git checkout main'
+
+# git export main to a directory
 function gem {
     if [[ "$2" != "" ]]; then
 	BRANCH="$2"
     else
-        BRANCH="master"
+        BRANCH="main"
     fi
 
+    mkdir -p "$1"
     git archive "$BRANCH" | tar -x -C "$1"
+    cd "$1"
+}
+
+# provide autocomplete for the gem function https://unix.stackexchange.com/questions/28283/autocomplete-of-filename-in-directory
+function __gemComplete {
+	local cur={COMP_WORDS[COMP_WORD]}
+	
+	IFS=$'\n' tmp=( $(compgen -W "$(ls ~/Documents/psaudio/)" -- $cur))
+	COMPREPLY=( "${tmp[@]// \/ }" )
+}
+complete -F __gemComplete gem
+
+# remove git submodule
+function grs {
+    git submodule deinit "$1"
+    git rm "$1"
+    git commit -m "Removed submodule $1"
+    rm -rf ".git/modules/$1"
 }
 
 # runs PHP Composer in a Docker container (defaults to latest Docker image)
@@ -154,3 +187,7 @@ function dcomposer {
 
 	docker run --rm -ti -v $(pwd):/app redisforlosers/composer:"$TAG"
 }
+
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
